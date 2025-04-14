@@ -37,7 +37,7 @@ export default function LoginForm() {
       await login(data.email, data.password);
       useAuthStore.getState().setRestored();
 
-      toast('Login realizado com sucesso.');
+      toast.success('Login realizado com sucesso.');
       router.push('/dashboard');
     } catch (err: any) {
       setError('Credenciais inválidas ou servidor indisponível.');
@@ -47,7 +47,7 @@ export default function LoginForm() {
   };
 
   return (
-    <Card className="w-full max-w-md shadow-lg animate-fade-in">
+    <Card className="w-full max-w-md shadow-lg animate-in slide-in-from-top-3 fade-in duration-300">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">Entrar</CardTitle>

@@ -7,8 +7,8 @@ export interface Task {
   title: string;
   content?: string;
   userId?: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export function useMyTasks() {

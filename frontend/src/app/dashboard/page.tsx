@@ -1,15 +1,31 @@
 'use client';
 
-import { useMyTasks, deleteTask } from '@/lib/tasks';
+import { useMyTasks, deleteTask, Task } from '@/lib/tasks';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import AppTemplate from '@/components/templates/AppTemplate';
 import { useAuthStore } from '@/lib/stores/useAuthStore';
+import { PlusCircle } from 'lucide-react';
+import TaskTable from '@/components/tasks/TaskTable';
+import Container from '@/components/common/Container';
+import { useState } from 'react';
+import TaskModal from '@/components/tasks/TaskModal';
 
 export default function DashboardPage() {
   const { tasks, isLoading, isError, refresh } = useMyTasks();
-  const router = useRouter();
-  const user = useAuthStore((s) => s.user);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentTask, setCurrentTask] = useState<Task | undefined>(undefined);
+
+  const handleEdit = (task: Task) => {
+    setCurrentTask(task);
+    setIsModalOpen(true);
+    // router.push(`/tasks/${id}/edit`);
+  };
+
+  const handleAddTask = () => {
+    setCurrentTask(undefined);
+    setIsModalOpen(true);
+  };
 
   const handleDelete = async (id: string) => {
     await deleteTask(id);
@@ -21,37 +37,24 @@ export default function DashboardPage() {
 
   return (
     <AppTemplate>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold">Minhas Tarefas</h1>
-          <Button onClick={() => router.push('/tasks/new')}>Nova Tarefa</Button>
-        </div>
+      <Container>
+        <div className="py-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-800">Minhas tarefas</h1>
+              <p className="text-slate-500 mt-1">Gerencie e organize suas tarefas de forma eficiente</p>
+            </div>
+            <Button className="mt-4 sm:mt-0 bg-brand-600 hover:bg-brand-700" onClick={handleAddTask}>
+              <PlusCircle className="h-4 w-4 mr-2" />
+              Nova Tarefa
+            </Button>
+          </div>
 
-        {tasks.length === 0 ? (
-          <p className="text-muted-foreground">Nenhuma tarefa encontrada.</p>
-        ) : (
-          <ul className="space-y-2">
-            {tasks.map((task) => (
-              <li key={task.id} className="flex items-start justify-between p-4 bg-white border rounded-md shadow-sm">
-                <div>
-                  <h2 className="font-medium">{task.title}</h2>
-                  {task.content && <p className="text-sm text-muted-foreground">{task.content}</p>}
-                </div>
-                {user?.id === task?.userId && (
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={() => router.push(`/tasks/${task.id}/edit`)}>
-                      Editar
-                    </Button>
-                    <Button size="sm" variant="destructive" onClick={() => handleDelete(task.id)}>
-                      Excluir
-                    </Button>
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+          <TaskTable tasks={tasks} onEditTask={handleEdit} onDeleteTask={handleDelete} />
+
+          <TaskModal open={isModalOpen} onClose={() => setIsModalOpen(false)} task={currentTask} mutate={refresh} />
+        </div>
+      </Container>
     </AppTemplate>
   );
 }
