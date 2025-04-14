@@ -6,6 +6,10 @@ export class SignUpDto {
   @IsEmail()
   email: string;
 
+  @ApiProperty({ example: 'Fulano de Tal' })
+  @IsString()
+  name: string;
+
   @ApiProperty({ example: 'P4$sw0rd!' })
   @IsString()
   password: string;

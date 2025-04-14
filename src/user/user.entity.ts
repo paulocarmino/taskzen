@@ -9,6 +9,9 @@ export class UserEntity {
   @ApiProperty()
   email: string;
 
+  @ApiProperty()
+  name: string;
+
   @Exclude()
   password: string;
 

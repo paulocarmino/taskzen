@@ -58,7 +58,7 @@ describe('AuthService', () => {
   it('should register a user and return tokens', async () => {
     mockUserRepository.create.mockResolvedValue({ id: 'user-1', role: 'USER' });
 
-    const result = await authService.register('email@test.com', '123456');
+    const result = await authService.register('email@test.com', 'Fulano de Tal', '123456');
 
     expect(mockUserRepository.create).toHaveBeenCalled();
     expect(mockJwtService.sign).toHaveBeenCalled();
@@ -126,7 +126,7 @@ describe('AuthService', () => {
 
     mockUserRepository.create.mockRejectedValueOnce(duplicateEmailError);
 
-    await expect(authService.register('user@example.com', 'P4$sw0rd!')).rejects.toThrow(ConflictException);
+    await expect(authService.register('user@example.com', 'Fulano de Tal', 'P4$sw0rd!')).rejects.toThrow(ConflictException);
   });
 
   it('should throw ForbiddenException if refresh token is expired', async () => {

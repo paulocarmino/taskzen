@@ -16,12 +16,12 @@ import { ApiTags, ApiOperation, ApiBody, ApiOkResponse, ApiBearerAuth } from '@n
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('register')
+  @Post('signup')
   @ApiOperation({ summary: 'Register a new user' })
   @ApiBody({ type: SignUpDto })
   @ApiOkResponse({ type: AuthResponse, description: 'Returns access and refresh tokens' })
   register(@Body() body: SignUpDto) {
-    return this.authService.register(body.email, body.password);
+    return this.authService.register(body.email, body.name, body.password);
   }
 
   @Post('login')

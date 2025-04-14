@@ -35,10 +35,11 @@ describe('AuthController', () => {
 
     const result = await controller.register({
       email: 'test@example.com',
+      name: 'Fulano de Tal',
       password: '123456',
     });
 
-    expect(authService.register).toHaveBeenCalledWith('test@example.com', '123456');
+    expect(authService.register).toHaveBeenCalledWith('test@example.com', 'Fulano de Tal', '123456');
     expect(result).toEqual(fakeResponse);
   });
 

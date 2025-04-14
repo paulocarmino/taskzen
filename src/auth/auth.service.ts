@@ -18,11 +18,11 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async register(email: string, password: string): Promise<AuthResponse> {
+  async register(email: string, name: string, password: string): Promise<AuthResponse> {
     const hashed = await bcrypt.hash(password, 10);
 
     try {
-      const user = await this.userRepo.create(email, hashed);
+      const user = await this.userRepo.create(email, name, hashed);
       return this.generateTokens(user.id, user.role);
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError && error.code === 'P2002') {

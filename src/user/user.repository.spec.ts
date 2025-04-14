@@ -6,6 +6,7 @@ import { UserEntity } from './user.entity';
 const mockUser = new UserEntity({
   id: 'user-1',
   email: 'user@example.com',
+  name: 'Fulano de Tal',
   password: 'hashed',
   role: 'USER',
   createdAt: new Date(),
@@ -34,10 +35,10 @@ describe('UserRepository', () => {
   it('should create a new user', async () => {
     mockPrisma.user.create.mockResolvedValue(mockUser);
 
-    const result = await repository.create(mockUser.email, mockUser.password);
+    const result = await repository.create(mockUser.email, mockUser.name, mockUser.password);
 
     expect(mockPrisma.user.create).toHaveBeenCalledWith({
-      data: { email: mockUser.email, password: mockUser.password },
+      data: { email: mockUser.email, name: mockUser.name, password: mockUser.password },
     });
     expect(result).toBe(mockUser);
   });
