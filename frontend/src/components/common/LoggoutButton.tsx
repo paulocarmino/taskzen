@@ -12,5 +12,9 @@ export function LogoutButton() {
     router.push('/login');
   };
 
-  return <Button onClick={handleLogout}>Sair</Button>;
+  return (
+    <Button variant="ghost" onClick={handleLogout}>
+      Sair
+    </Button>
+  );
 }
