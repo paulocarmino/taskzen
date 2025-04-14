@@ -7,11 +7,11 @@ export class TasksService {
   constructor(private readonly prisma: PrismaService) {}
 
   findAll() {
-    return this.prisma.task.findMany();
+    return this.prisma.task.findMany({ orderBy: { createdAt: 'desc' } });
   }
 
   findByUser(userId: string) {
-    return this.prisma.task.findMany({ where: { userId } });
+    return this.prisma.task.findMany({ where: { userId }, orderBy: { createdAt: 'desc' } });
   }
 
   async findOneOrFail(id: string, user: User) {

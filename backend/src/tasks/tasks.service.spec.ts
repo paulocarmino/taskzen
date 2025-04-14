@@ -85,7 +85,7 @@ describe('TasksService', () => {
 
     const result = await service.findByUser(mockUser.id);
 
-    expect(mockPrisma.task.findMany).toHaveBeenCalledWith({ where: { userId: mockUser.id } });
+    expect(mockPrisma.task.findMany).toHaveBeenCalledWith({ where: { userId: mockUser.id }, orderBy: { createdAt: 'desc' } });
     expect(result).toEqual(mockTasks);
   });
 
@@ -123,6 +123,7 @@ describe('TasksService', () => {
 
     expect(mockPrisma.task.findMany).toHaveBeenCalledWith({
       where: { userId: mockUser.id },
+      orderBy: { createdAt: 'desc' },
     });
     expect(result).toEqual(userTasks);
   });
