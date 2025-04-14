@@ -1,6 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserRepository } from './user.repository';
 import { PrismaService } from '../prisma/prisma.service';
+import { UserEntity } from './user.entity';
+
+const mockUser = new UserEntity({
+  id: 'user-1',
+  email: 'user@example.com',
+  password: 'hashed',
+  role: 'USER',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+});
 
 describe('UserRepository', () => {
   let repository: UserRepository;
@@ -22,26 +32,24 @@ describe('UserRepository', () => {
   afterEach(() => jest.clearAllMocks());
 
   it('should create a new user', async () => {
-    const user = { id: 'user-1', email: 'test@example.com', password: 'hashed' };
-    mockPrisma.user.create.mockResolvedValue(user);
+    mockPrisma.user.create.mockResolvedValue(mockUser);
 
-    const result = await repository.create(user.email, user.password);
+    const result = await repository.create(mockUser.email, mockUser.password);
 
     expect(mockPrisma.user.create).toHaveBeenCalledWith({
-      data: { email: user.email, password: user.password },
+      data: { email: mockUser.email, password: mockUser.password },
     });
-    expect(result).toBe(user);
+    expect(result).toBe(mockUser);
   });
 
   it('should find a user by email', async () => {
-    const user = { id: 'user-1', email: 'test@example.com', password: 'hashed' };
-    mockPrisma.user.findUnique.mockResolvedValue(user);
+    mockPrisma.user.findUnique.mockResolvedValue(mockUser);
 
-    const result = await repository.findByEmail(user.email);
+    const result = await repository.findByEmail(mockUser.email);
 
     expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
-      where: { email: user.email },
+      where: { email: mockUser.email },
     });
-    expect(result).toBe(user);
+    expect(result).toBe(mockUser);
   });
 });

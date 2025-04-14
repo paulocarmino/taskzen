@@ -1,5 +1,10 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { User } from '@prisma/client';
+
 import { AuthService, AuthResponse } from './auth.service';
+import { CurrentUser } from './decorators/user.decorator';
+import { UserEntity } from '../user/user.entity';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -18,5 +23,11 @@ export class AuthController {
   @Post('token/refresh')
   refresh(@Body() body: { refreshToken: string }): Promise<AuthResponse> {
     return this.authService.refresh(body.refreshToken);
+  }
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  getMe(@CurrentUser() user: User): UserEntity {
+    return new UserEntity(user);
   }
 }

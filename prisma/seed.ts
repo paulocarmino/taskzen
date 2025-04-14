@@ -4,33 +4,36 @@ import * as bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-  const password = await bcrypt.hash('123456', 10);
+  await prisma.refreshToken.deleteMany();
+  await prisma.task.deleteMany();
+  await prisma.user.deleteMany();
 
-  const admin = await prisma.user.upsert({
-    where: { email: 'admin@task.com' },
-    update: {},
-    create: {
-      email: 'admin@task.com',
+  const password = await bcrypt.hash('P4$sw0rd!', 10);
+
+  const user = await prisma.user.create({
+    data: {
+      email: 'user@example.com',
+      password,
+      role: 'USER',
+    },
+  });
+
+  const admin = await prisma.user.create({
+    data: {
+      email: 'admin@example.com',
       password,
       role: 'ADMIN',
     },
   });
 
-  const user = await prisma.user.upsert({
-    where: { email: 'user@task.com' },
-    update: {},
-    create: {
-      email: 'user@task.com',
-      password,
-    },
-  });
-
   await prisma.task.createMany({
     data: [
-      { title: 'Task 1', content: 'Content 1', userId: user.id },
-      { title: 'Task 2', content: 'Content 2', userId: user.id },
-      { title: 'Task 3', content: 'Content 3', userId: user.id },
-      { title: 'Task 4', content: 'Content 4', userId: admin.id },
+      { title: 'Write documentation', content: 'Finish writing API docs.', userId: user.id },
+      { title: 'Fix login bug', content: 'Resolve 500 error on login route.', userId: user.id },
+      { title: 'Review pull request', content: 'Review PR #42 and approve it.', userId: user.id },
+      { title: 'Create admin panel', content: 'Start building the admin dashboard.', userId: admin.id },
+      { title: 'Deploy staging app', content: 'Deploy current version to staging.', userId: admin.id },
+      { title: 'Test Stripe integration', content: 'Ensure payments work end-to-end.', userId: admin.id },
     ],
   });
 
