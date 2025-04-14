@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  db:
+    image: postgres
+    ports:
+      - '0.0.0.0:5432:5432'
+    environment:
+      POSTGRES_USER: task_manager
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: task_manager_production
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgres://task_manager:postgres@db:5432/task_manager_production
+      JWT_SECRET: SvG3kCSujc0T52D42W9lvvdF4kf1nvRj
+      JWT_EXPIRES_IN: 15m
+      REFRESH_TOKEN_EXPIRES_IN: 7d
+    ports:
+      - '3000:3000'
+    depends_on:
+      - db
+    command: npm run start:prod
