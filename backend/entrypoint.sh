@@ -11,6 +11,7 @@ echo "✅ Postgres is available!"
 
 echo "🔄 Running database migrations..."
 pnpm prisma migrate deploy
+pnpm prisma generate
 
 echo "🔄 Seeding database..."
 pnpm exec tsx prisma/seed.ts

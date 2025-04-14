@@ -1,4 +1,4 @@
-# 🧠 Task Manager API
+# 🧠 TaskZen API
 
 Sistema de gerenciamento de tarefas com autenticação JWT, controle de permissões por papel (RBAC), e documentação Swagger.
 
