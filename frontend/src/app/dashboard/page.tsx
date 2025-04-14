@@ -2,9 +2,7 @@
 
 import { useMyTasks, deleteTask, Task } from '@/lib/tasks';
 import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
 import AppTemplate from '@/components/templates/AppTemplate';
-import { useAuthStore } from '@/lib/stores/useAuthStore';
 import { PlusCircle } from 'lucide-react';
 import TaskTable from '@/components/tasks/TaskTable';
 import Container from '@/components/common/Container';

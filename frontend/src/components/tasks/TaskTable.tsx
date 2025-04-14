@@ -11,10 +11,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Task } from '@/lib/tasks';
-import { read } from 'fs';
 import { Edit, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -98,7 +96,7 @@ export default function TaskTable({ tasks, onEditTask, onDeleteTask, readonly }:
           <AlertDialogHeader>
             <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
             <AlertDialogDescription>
-              Essa ação não poderá ser desfeita. Isso irá remover a tarefa <strong>"{taskToDelete?.title}"</strong> permanentemente.
+              Essa ação não poderá ser desfeita. Isso irá remover a tarefa <strong>{`"${taskToDelete?.title}"`}</strong> permanentemente.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

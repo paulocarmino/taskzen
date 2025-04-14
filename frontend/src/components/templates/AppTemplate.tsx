@@ -1,13 +1,13 @@
 'use client';
 
-import { redirect, usePathname } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { useRestoreSession } from '@/lib/hooks/useRestoreSession';
 import { useAuthStore } from '@/lib/stores/useAuthStore';
 import { SplashScreen } from '@/components/common/SplashScreen';
 import { LogoutButton } from '@/components/common/LoggoutButton';
 import { useRedirectIfUnauthenticated } from '@/lib/hooks/useRedirectIfUnauthenticated';
 import Link from 'next/link';
-import { Home, ListTodo, LogOut, Menu, Settings2, User } from 'lucide-react';
+import { Home, ListTodo, Menu, Settings2, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
@@ -17,8 +17,6 @@ export default function AppTemplate({ children }: { children: React.ReactNode })
 
   const authStatus = useAuthStore((s) => s.authStatus);
   const user = useAuthStore((s) => s.user);
-  const pathname = usePathname();
-  const isAdminView = pathname === '/admin/tasks';
 
   if (authStatus === 'checking' || authStatus === 'idle') {
     return <SplashScreen />;

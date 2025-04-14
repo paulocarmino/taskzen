@@ -1,5 +1,3 @@
-import useSWR from 'swr';
-import api from '@/lib/api';
 import { useProtectedFetcher } from '@/lib/fetcher';
 
 export interface Task {

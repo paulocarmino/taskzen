@@ -7,8 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { createTask, Task, updateTask } from '@/lib/tasks';
-import { useRouter } from 'next/navigation';
-import { mutate } from 'swr';
+
 interface TaskModalProps {
   open: boolean;
   onClose: () => void;
@@ -20,8 +19,6 @@ export default function TaskModal({ open, onClose, task, mutate }: TaskModalProp
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [titleError, setTitleError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   useEffect(() => {
     if (task) {
@@ -43,7 +40,6 @@ export default function TaskModal({ open, onClose, task, mutate }: TaskModalProp
   };
 
   const handleCreate = async (data: { title: string; content?: string }) => {
-    setLoading(true);
     await createTask(data);
 
     mutate();
@@ -51,7 +47,6 @@ export default function TaskModal({ open, onClose, task, mutate }: TaskModalProp
   };
 
   const handleUpdate = async (data: { title?: string; content?: string }) => {
-    setLoading(true);
     await updateTask(task!.id, data);
 
     mutate();

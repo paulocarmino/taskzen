@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/stores/useAuthStore';
 import { SplashScreen } from '@/components/common/SplashScreen';
 import { ListTodo } from 'lucide-react';

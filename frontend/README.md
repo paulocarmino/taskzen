@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🧠 ZenTask Frontend
 
-## Getting Started
+Interface de usuário para o sistema de gerenciamento de tarefas, com autenticação, perfis de usuário e gerenciamento completo de tarefas.
 
-First, run the development server:
+> Parte frontend do projeto desenvolvido como desafio técnico para vaga de desenvolvedor fullstack sênior.
+
+## 🛠️ Stack utilizada
+
+- **Framework:** React (NextJS) com TypeScript
+- **Gerenciamento de Estado:** Zustand
+- **Estilização:** TailwindCSS + shadcnUI
+- **Formulários:** React Hook Form + Zod
+- **HTTP Client:** Axios + SWR
+- **Infraestrutura:** Docker
+- **Testes:** Playwright (E2E)
+
+## 🚀 Como rodar o projeto (frontend)
+
+### ✅ Modo Dev (UI local)
+
+> Ideal para desenvolvimento com hot reload.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+# Configure as variáveis de ambiente
+cp .env.example .env
+
+# Instale as dependências
+pnpm install
+
+# Inicie o servidor de desenvolvimento
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 🐳 Modo Docker (UI conteinerizada)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+> Ideal para ambiente isolado ou testes.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# Configure as variáveis de ambiente
+cp .env.example .env
 
-## Learn More
+# Construa e inicie o container
+docker-compose -p task_manager_frontend -f docker-compose.yml up --build
+```
 
-To learn more about Next.js, take a look at the following resources:
+Acesse a aplicação em:  
+🖥️ http://localhost:3000
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📄 Exemplo de .env
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```env
+NEXT_PUBLIC_API_URL=http://localhost:4000
+NEXT_PUBLIC_APP_NAME=Task Manager
+```
 
-## Deploy on Vercel
+## 🎯 Funcionalidades principais
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Autenticação completa:**
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+  - Login/Signup
+  - Persistência de sessão via cookie httpOnly
+  - Refresh token automático
+  - Logout
+
+- **Gerenciamento de tarefas:**
+
+  - Listagem de tarefas
+  - Criação de novas tarefas
+  - Edição de tarefas existentes
+  - Exclusão de tarefas
+
+- **Interface administrativa (para usuários admin):**
+  - Visualização de todas as tarefas do sistema
+
+## 🧰 Padrões e decisões técnicas
+
+- **Arquitetura NextJS:** Aproveitamento do sistema de roteamento e SSR
+- **Componentes shadcnUI:** Interface consistente e acessível
+- **Autenticação com JWT:** Cookie httpOnly para refresh token
+- **Zustand para gerenciamento de estado:** Solução leve e performática
+- **SWR para data fetching:** Cache, revalidação e status de loading
+- **Responsividade:** Interface adaptável para dispositivos móveis e desktop
+
+## 🧪 Testes
+
+```bash
+# Testes E2E com Playwright
+pnpm test:e2e
+```
+
+- Testes E2E simulando interações completas do usuário
+
+## 🧠 Destaques técnicos
+
+- ✅ **Autenticação segura** com cookies httpOnly
+- ✅ **UI consistente** com shadcnUI e TailwindCSS
+- ✅ **Design responsivo** para todas as resoluções
+- ✅ **Forms tipados** com React Hook Form e Zod
+- ✅ **Gerenciamento de estado** eficiente com Zustand
+- ✅ **Data fetching** otimizado com SWR
+- ✅ **Dockerfile e docker-compose** configurados
