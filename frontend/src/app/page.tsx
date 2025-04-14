@@ -1,11 +1,21 @@
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
+'use client';
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center 
-          min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <Button>Button ShadcnUI</Button>
-    </div>
-  );
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/lib/stores/useAuthStore';
+import { SplashScreen } from '@/components/common/SplashScreen';
+
+export default function RootRedirect() {
+  const user = useAuthStore((s) => s.user);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (user) {
+      router.replace('/dashboard');
+    } else {
+      router.replace('/login');
+    }
+  }, [user, router]);
+
+  return <SplashScreen />;
 }
