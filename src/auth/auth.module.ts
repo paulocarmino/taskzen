@@ -3,6 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UserModule } from 'src/user/user.module';
+import { TokenCleanupService } from 'src/auth/token-cleanup.service';
 
 @Module({
   imports: [
@@ -12,7 +13,7 @@ import { UserModule } from 'src/user/user.module';
     }),
     forwardRef(() => UserModule),
   ],
-  providers: [AuthService],
+  providers: [AuthService, TokenCleanupService],
   controllers: [AuthController],
 })
 export class AuthModule {}

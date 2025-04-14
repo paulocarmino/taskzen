@@ -94,6 +94,7 @@ npm run test
 - ✅ **TDD completo** no fluxo de autenticação
 - ✅ **JWT + Refresh Token com controle de expiração**
 - ✅ **Revogação segura de tokens via endpoint `/logout`**
+- ✅ **Limpeza automática de refresh tokens expirados (cron job)**
 - ✅ **Uso de `UserEntity` com `class-transformer` para ocultar senha**
 - ✅ **Guarda de roles (`RolesGuard`) + decorador `@CurrentUser()`**
 - ✅ **Dockerfile e docker-compose configurados**
