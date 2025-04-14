@@ -23,11 +23,14 @@ Sistema de gerenciamento de tarefas com autenticação JWT, controle de permiss�
 cp .env.example .env
 docker-compose -p task_manager -f docker-compose.local.yml up -d
 npm install
+npm exec prisma migrate deploy
+npm exec prisma generate
+npm exec tsx prisma/seed.ts
 npm run start:dev
 ```
 
 Acesse a documentação Swagger em:  
-📄 http://localhost:3000/docs
+📄 http://localhost:4000/docs
 
 ### 🐳 Modo Full Docker (App + DB conteinerizados)
 
@@ -35,13 +38,13 @@ Acesse a documentação Swagger em:
 
 ```bash
 cp .env.example .env
-docker-compose -p task_manager -f docker-compose.full.yml up --build
+docker-compose -p task_manager_prd -f docker-compose.full.yml up --build
 ```
 
 Isso irá:
 
 - Subir o PostgreSQL na porta 5432
-- Subir a API na porta 3000
+- Subir a API na porta 4000
 - Aplicar variáveis de ambiente automaticamente
 
 ## 📄 Exemplo de `.env`
@@ -52,6 +55,23 @@ JWT_SECRET=supersecret
 JWT_EXPIRES_IN=15m
 REFRESH_TOKEN_EXPIRES_IN=7d
 ```
+
+## 👤 Usuários de teste (pré-criados via seed)
+
+Ao rodar o projeto, dois usuários são automaticamente criados via seed script:
+
+| Tipo    | Email             | Senha     | Permissões                       |
+| ------- | ----------------- | --------- | -------------------------------- |
+| Admin   | admin@example.com | P4$sw0rd! | Visualiza todas as tarefas       |
+| Usuário | user@example.com  | P4$sw0rd! | CRUD apenas nas próprias tarefas |
+
+Esses usuários podem ser usados para:
+
+- Autenticação via `/auth/login`
+- Testes manuais via Swagger ou REST Client
+- Verificação prática de RBAC (controle de permissões)
+
+> 📌 A senha de ambos os usuários é **P4$sw0rd!**
 
 ## 🔐 Autenticação e RBAC
 
@@ -78,7 +98,7 @@ REFRESH_TOKEN_EXPIRES_IN=7d
 | DELETE | `/tasks/:id`    | Deleta uma tarefa (owner/admin)      |
 
 > Todos os endpoints são documentados via Swagger:  
-> http://localhost:3000/docs
+> http://localhost:4000/docs
 
 ## 🧪 Testes
 

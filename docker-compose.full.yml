@@ -20,7 +20,6 @@ services:
       JWT_EXPIRES_IN: 15m
       REFRESH_TOKEN_EXPIRES_IN: 7d
     ports:
-      - '3000:3000'
+      - '4000:4000'
     depends_on:
       - db
-    command: npm run start:prod

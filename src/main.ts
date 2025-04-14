@@ -2,13 +2,16 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
   const reflector = app.get(Reflector);
 
   app.useGlobalInterceptors(new ClassSerializerInterceptor(reflector));
+  app.useGlobalInterceptors(new LoggerErrorInterceptor());
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  app.useLogger(app.get(Logger));
 
   const config = new DocumentBuilder()
     .setTitle('Task Manager - API')
