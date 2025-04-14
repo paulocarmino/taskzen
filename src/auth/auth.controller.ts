@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, UseGuards, UseInterceptors, ClassSerializerInterceptor } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, UseInterceptors, ClassSerializerInterceptor, HttpCode } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './decorators/user.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -9,6 +9,7 @@ import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ApiTags, ApiOperation, ApiBody, ApiOkResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { LogoutDto } from '../auth/dto/logout.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -20,8 +21,8 @@ export class AuthController {
   @ApiOperation({ summary: 'Register a new user' })
   @ApiBody({ type: SignUpDto })
   @ApiOkResponse({ type: AuthResponse, description: 'Returns access and refresh tokens' })
-  register(@Body() body: SignUpDto) {
-    return this.authService.register(body.email, body.name, body.password);
+  signup(@Body() body: SignUpDto) {
+    return this.authService.signup(body.email, body.name, body.password);
   }
 
   @Post('login')
@@ -32,7 +33,7 @@ export class AuthController {
     return this.authService.login(body.email, body.password);
   }
 
-  @Post('refresh')
+  @Post('token/refresh')
   @ApiOperation({ summary: 'Refresh access token using a valid refresh token' })
   @ApiBody({ type: RefreshTokenDto })
   @ApiOkResponse({ type: AuthResponse, description: 'Returns new access and refresh tokens' })
@@ -47,5 +48,15 @@ export class AuthController {
   @ApiOkResponse({ type: UserEntity })
   getMe(@CurrentUser() user: User): UserEntity {
     return new UserEntity(user);
+  }
+
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Logout (invalidate refresh token)' })
+  @ApiBody({ type: LogoutDto })
+  @HttpCode(204)
+  async logout(@Body() body: LogoutDto): Promise<void> {
+    await this.authService.logout(body.refreshToken);
   }
 }

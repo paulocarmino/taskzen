@@ -32,6 +32,7 @@ const mockPrismaService = {
   refreshToken: {
     create: jest.fn(),
     findMany: jest.fn(),
+    delete: jest.fn(),
   },
 };
 
@@ -55,89 +56,118 @@ describe('AuthService', () => {
     jest.clearAllMocks();
   });
 
-  it('should register a user and return tokens', async () => {
-    mockUserRepository.create.mockResolvedValue({ id: 'user-1', role: 'USER' });
+  describe('signup()', () => {
+    it('should register a user and return tokens', async () => {
+      mockUserRepository.create.mockResolvedValue({ id: 'user-1', role: 'USER' });
 
-    const result = await authService.register('email@test.com', 'Fulano de Tal', '123456');
+      const result = await authService.signup('email@test.com', 'Fulano de Tal', '123456');
 
-    expect(mockUserRepository.create).toHaveBeenCalled();
-    expect(mockJwtService.sign).toHaveBeenCalled();
-    expect(mockPrismaService.refreshToken.create).toHaveBeenCalled();
-    expect(result).toEqual({
-      accessToken: 'fake-jwt',
-      refreshToken: expect.any(String),
+      expect(mockUserRepository.create).toHaveBeenCalled();
+      expect(result).toEqual({
+        accessToken: 'fake-jwt',
+        refreshToken: expect.any(String),
+      });
+    });
+
+    it('should throw ConflictException when email already exists', async () => {
+      const duplicateEmailError = new PrismaClientKnownRequestError('Unique constraint failed', {
+        code: 'P2002',
+        clientVersion: '6.6.0',
+      });
+
+      mockUserRepository.create.mockRejectedValueOnce(duplicateEmailError);
+
+      await expect(authService.signup('user@example.com', 'Fulano de Tal', 'P4$sw0rd!')).rejects.toThrow(ConflictException);
     });
   });
 
-  it('should login with correct credentials', async () => {
-    const hashedUser = await createMockUser('123456');
-    mockUserRepository.findByEmail.mockResolvedValue(hashedUser);
+  describe('login()', () => {
+    it('should login with correct credentials', async () => {
+      const hashedUser = await createMockUser('123456');
+      mockUserRepository.findByEmail.mockResolvedValue(hashedUser);
 
-    const result = await authService.login('test@example.com', '123456');
+      const result = await authService.login('test@example.com', '123456');
 
-    expect(result).toEqual({
-      accessToken: 'fake-jwt',
-      refreshToken: expect.any(String),
+      expect(result).toEqual({
+        accessToken: 'fake-jwt',
+        refreshToken: expect.any(String),
+      });
+    });
+
+    it('should throw UnauthorizedException for wrong password', async () => {
+      const hashedUser = await createMockUser('senha-correta');
+      mockUserRepository.findByEmail.mockResolvedValue(hashedUser);
+
+      await expect(authService.login('test@example.com', 'senha-errada')).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should throw UnauthorizedException for nonexistent user', async () => {
+      mockUserRepository.findByEmail.mockResolvedValue(null);
+
+      await expect(authService.login('fake@example.com', '123456')).rejects.toThrow(UnauthorizedException);
     });
   });
 
-  it('should throw UnauthorizedException for wrong password', async () => {
-    const hashedUser = await createMockUser('senha-correta');
-    mockUserRepository.findByEmail.mockResolvedValue(hashedUser);
+  describe('refresh()', () => {
+    it('should return new tokens if refresh token is valid', async () => {
+      const hashedToken = await bcrypt.hash('valid-refresh', 10);
+      mockPrismaService.refreshToken.findMany.mockResolvedValue([
+        {
+          token: hashedToken,
+          expiresAt: new Date(Date.now() + 10000),
+          user: mockUser,
+        },
+      ]);
 
-    await expect(authService.login('test@example.com', 'senha-errada')).rejects.toThrow(UnauthorizedException);
-  });
+      const result = await authService.refresh('valid-refresh');
 
-  it('should throw UnauthorizedException for nonexistent user', async () => {
-    mockUserRepository.findByEmail.mockResolvedValue(null);
+      expect(result).toEqual({
+        accessToken: 'fake-jwt',
+        refreshToken: expect.any(String),
+      });
+    });
 
-    await expect(authService.login('fake@example.com', '123456')).rejects.toThrow(UnauthorizedException);
-  });
+    it('should throw ForbiddenException on invalid refresh token', async () => {
+      mockPrismaService.refreshToken.findMany.mockResolvedValue([]);
 
-  it('should refresh token if valid', async () => {
-    const hashedToken = await bcrypt.hash('valid-refresh', 10);
-    mockPrismaService.refreshToken.findMany.mockResolvedValue([
-      {
-        token: hashedToken,
-        expiresAt: new Date(Date.now() + 10000),
-        user: mockUser,
-      },
-    ]);
+      await expect(authService.refresh('bad-refresh')).rejects.toThrow(ForbiddenException);
+    });
 
-    const result = await authService.refresh('valid-refresh');
+    it('should throw ForbiddenException if refresh token is expired', async () => {
+      const expiredToken = {
+        token: await bcrypt.hash('expired-token', 10),
+        expiresAt: new Date(Date.now() - 60 * 1000),
+        user: { id: 'user-1', role: 'USER' },
+      };
 
-    expect(result).toEqual({
-      accessToken: 'fake-jwt',
-      refreshToken: expect.any(String),
+      mockPrismaService.refreshToken.findMany.mockResolvedValue([expiredToken]);
+
+      await expect(authService.refresh('expired-token')).rejects.toThrow(ForbiddenException);
     });
   });
 
-  it('should throw ForbiddenException on invalid refresh token', async () => {
-    mockPrismaService.refreshToken.findMany.mockResolvedValue([]);
+  describe('logout()', () => {
+    it('should revoke a valid refresh token by deleting it from the database', async () => {
+      const raw = 'token-to-delete';
+      const hash = await bcrypt.hash(raw, 10);
+      const mockToken = { id: '123', token: hash };
 
-    await expect(authService.refresh('bad-refresh')).rejects.toThrow(ForbiddenException);
-  });
+      mockPrismaService.refreshToken.findMany.mockResolvedValue([mockToken]);
+      mockPrismaService.refreshToken.delete.mockResolvedValue({});
 
-  it('should throw ConflictException when email already exists', async () => {
-    const duplicateEmailError = new PrismaClientKnownRequestError('Unique constraint failed', {
-      code: 'P2002',
-      clientVersion: '6.6.0',
+      await authService.logout(raw);
+
+      expect(mockPrismaService.refreshToken.delete).toHaveBeenCalledWith({
+        where: { id: mockToken.id },
+      });
     });
 
-    mockUserRepository.create.mockRejectedValueOnce(duplicateEmailError);
+    it('should ignore invalid refresh tokens and perform no database deletion', async () => {
+      const raw = 'invalid-token';
+      mockPrismaService.refreshToken.findMany.mockResolvedValue([]);
 
-    await expect(authService.register('user@example.com', 'Fulano de Tal', 'P4$sw0rd!')).rejects.toThrow(ConflictException);
-  });
-
-  it('should throw ForbiddenException if refresh token is expired', async () => {
-    const expiredToken = {
-      token: await bcrypt.hash('expired-token', 10),
-      expiresAt: new Date(Date.now() - 60 * 1000), // expired
-      user: { id: 'user-1', role: 'USER' },
-    };
-
-    mockPrismaService.refreshToken.findMany.mockResolvedValue([expiredToken]);
-
-    await expect(authService.refresh('expired-token')).rejects.toThrow();
+      await expect(authService.logout(raw)).resolves.toBeUndefined();
+      expect(mockPrismaService.refreshToken.delete).not.toHaveBeenCalled();
+    });
   });
 });

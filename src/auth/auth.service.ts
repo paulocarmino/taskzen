@@ -18,7 +18,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async register(email: string, name: string, password: string): Promise<AuthResponse> {
+  async signup(email: string, name: string, password: string): Promise<AuthResponse> {
     const hashed = await bcrypt.hash(password, 10);
 
     try {
@@ -52,6 +52,16 @@ export class AuthService {
     if (!tokenEntry) throw new ForbiddenException('Invalid or expired refresh token');
 
     return this.generateTokens(tokenEntry.user.id, tokenEntry.user.role);
+  }
+
+  async logout(refreshToken: string): Promise<void> {
+    const tokens = await this.prisma.refreshToken.findMany();
+
+    const tokenEntry = tokens.find((entry) => bcrypt.compareSync(refreshToken, entry.token));
+
+    if (tokenEntry) {
+      await this.prisma.refreshToken.delete({ where: { id: tokenEntry.id } });
+    }
   }
 
   private async generateTokens(userId: string, role: Role): Promise<AuthResponse> {
