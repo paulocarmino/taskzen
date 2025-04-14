@@ -43,30 +43,16 @@ export class AuthService {
   }
 
   async refresh(refreshToken: string): Promise<AuthResponse> {
-    const validTokens = await this.prisma.refreshToken.findMany({
-      where: {
-        expiresAt: { gt: new Date() },
-      },
+    const tokenEntry = await this.prisma.refreshToken.findUnique({
+      where: { rawTokenId: refreshToken },
       include: { user: true },
     });
 
-    let tokenEntry;
-
-    for (const entry of validTokens) {
-      const match = await bcrypt.compare(refreshToken, entry.token);
-      if (match) {
-        tokenEntry = entry;
-        break;
-      }
-    }
-
-    if (!tokenEntry) {
+    if (!tokenEntry || tokenEntry.expiresAt < new Date()) {
       throw new ForbiddenException('Invalid or expired refresh token');
     }
 
-    await this.prisma.refreshToken.delete({
-      where: { id: tokenEntry.id },
-    });
+    await this.prisma.refreshToken.delete({ where: { id: tokenEntry.id } });
 
     return this.generateTokens(tokenEntry.user.id, tokenEntry.user.role);
   }
@@ -93,6 +79,7 @@ export class AuthService {
     await this.prisma.refreshToken.create({
       data: {
         token: hashed,
+        rawTokenId: refreshToken,
         userId,
         expiresAt: new Date(Date.now() + refreshExpiresIn),
       },

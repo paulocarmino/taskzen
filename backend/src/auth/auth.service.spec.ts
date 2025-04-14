@@ -32,6 +32,7 @@ const mockPrismaService = {
   refreshToken: {
     create: jest.fn(),
     findMany: jest.fn(),
+    findUnique: jest.fn(),
     delete: jest.fn(),
   },
 };
@@ -110,14 +111,15 @@ describe('AuthService', () => {
 
   describe('refresh()', () => {
     it('should return new tokens if refresh token is valid', async () => {
-      const hashedToken = await bcrypt.hash('valid-refresh', 10);
-      mockPrismaService.refreshToken.findMany.mockResolvedValue([
-        {
-          token: hashedToken,
-          expiresAt: new Date(Date.now() + 10000),
-          user: mockUser,
-        },
-      ]);
+      const mockToken = {
+        id: 'token-id',
+        rawTokenId: 'valid-refresh',
+        token: 'hashed',
+        expiresAt: new Date(Date.now() + 10000),
+        user: mockUser,
+      };
+
+      mockPrismaService.refreshToken.findUnique.mockResolvedValue(mockToken);
 
       const result = await authService.refresh('valid-refresh');
 
@@ -128,7 +130,7 @@ describe('AuthService', () => {
     });
 
     it('should throw ForbiddenException on invalid refresh token', async () => {
-      mockPrismaService.refreshToken.findMany.mockResolvedValue([]);
+      mockPrismaService.refreshToken.findUnique.mockResolvedValue(null);
 
       await expect(authService.refresh('bad-refresh')).rejects.toThrow(ForbiddenException);
     });
