@@ -5,6 +5,7 @@ import { UserRepository } from '../user/user.repository';
 import { PrismaService } from '../prisma/prisma.service';
 import { Role } from '@prisma/client';
 import { randomUUID } from 'crypto';
+import { AuthResponse } from 'src/auth/dto/auth-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -60,9 +61,4 @@ export class AuthService {
 
     return { accessToken, refreshToken };
   }
-}
-
-export interface AuthResponse {
-  accessToken: string;
-  refreshToken: string;
 }
