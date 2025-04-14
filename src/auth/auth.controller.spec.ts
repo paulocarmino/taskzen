@@ -4,6 +4,7 @@ import { AuthService } from './auth.service';
 import { AuthResponse } from 'src/auth/dto/auth-response.dto';
 import { UserEntity } from 'src/user/user.entity';
 import { instanceToPlain } from 'class-transformer';
+import { Role } from '@prisma/client';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -18,7 +19,7 @@ describe('AuthController', () => {
     id: 'user-1',
     email: 'x@x.com',
     name: 'Fulano de Tal',
-    role: 'USER',
+    role: Role.USER,
     password: '',
     createdAt: new Date(),
     updatedAt: new Date(),

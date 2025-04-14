@@ -2,13 +2,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserRepository } from './user.repository';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserEntity } from './user.entity';
+import { Role } from '@prisma/client';
 
 const mockUser = new UserEntity({
   id: 'user-1',
   email: 'user@example.com',
   name: 'Fulano de Tal',
   password: 'hashed',
-  role: 'USER',
+  role: Role.USER,
   createdAt: new Date(),
   updatedAt: new Date(),
 });

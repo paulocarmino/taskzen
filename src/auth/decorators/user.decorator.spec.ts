@@ -1,9 +1,10 @@
 import { ExecutionContext } from '@nestjs/common';
 import { extractUserFromContext } from './user.decorator';
+import { Role } from '@prisma/client';
 
 describe('extractUserFromContext', () => {
   it('should extract user from request object', () => {
-    const mockUser = { id: 'user-1', role: 'USER' };
+    const mockUser = { id: 'user-1', role: Role.USER };
 
     const context = {
       switchToHttp: () => ({
