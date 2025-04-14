@@ -1,11 +1,14 @@
-import { Injectable, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ForbiddenException, ConflictException } from '@nestjs/common';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcryptjs';
-import { UserRepository } from '../user/user.repository';
-import { PrismaService } from '../prisma/prisma.service';
 import { Role } from '@prisma/client';
 import { randomUUID } from 'crypto';
-import { AuthResponse } from 'src/auth/dto/auth-response.dto';
+import * as bcrypt from 'bcryptjs';
+
+import { UserRepository } from '../user/user.repository';
+import { PrismaService } from '../prisma/prisma.service';
+import { AuthResponse } from '../auth/dto/auth-response.dto';
+import { parseDuration } from '../../src/utils';
 
 @Injectable()
 export class AuthService {
@@ -17,8 +20,16 @@ export class AuthService {
 
   async register(email: string, password: string): Promise<AuthResponse> {
     const hashed = await bcrypt.hash(password, 10);
-    const user = await this.userRepo.create(email, hashed);
-    return this.generateTokens(user.id, user.role);
+
+    try {
+      const user = await this.userRepo.create(email, hashed);
+      return this.generateTokens(user.id, user.role);
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new ConflictException('E-mail already in use');
+      }
+      throw error;
+    }
   }
 
   async login(email: string, password: string): Promise<AuthResponse> {
@@ -33,13 +44,12 @@ export class AuthService {
 
   async refresh(refreshToken: string): Promise<AuthResponse> {
     const tokens = await this.prisma.refreshToken.findMany({
-      where: { expiresAt: { gt: new Date() } },
       include: { user: true },
     });
 
-    const tokenEntry = tokens.find((entry) => bcrypt.compareSync(refreshToken, entry.token));
+    const tokenEntry = tokens.find((entry) => entry.expiresAt > new Date() && bcrypt.compareSync(refreshToken, entry.token));
 
-    if (!tokenEntry) throw new ForbiddenException('Invalid refresh token');
+    if (!tokenEntry) throw new ForbiddenException('Invalid or expired refresh token');
 
     return this.generateTokens(tokenEntry.user.id, tokenEntry.user.role);
   }
@@ -51,11 +61,13 @@ export class AuthService {
     const refreshToken = randomUUID();
     const hashed = await bcrypt.hash(refreshToken, 10);
 
+    const refreshExpiresIn = parseDuration(process.env.REFRESH_TOKEN_EXPIRES_IN || '7d');
+
     await this.prisma.refreshToken.create({
       data: {
         token: hashed,
         userId,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        expiresAt: new Date(Date.now() + refreshExpiresIn),
       },
     });
 

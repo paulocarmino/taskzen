@@ -4,7 +4,8 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserRepository } from '../user/user.repository';
 import * as bcrypt from 'bcryptjs';
-import { UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import { UnauthorizedException, ForbiddenException, ConflictException } from '@nestjs/common';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 const mockUser = {
   id: 'user-1',
@@ -115,5 +116,28 @@ describe('AuthService', () => {
     mockPrismaService.refreshToken.findMany.mockResolvedValue([]);
 
     await expect(authService.refresh('bad-refresh')).rejects.toThrow(ForbiddenException);
+  });
+
+  it('should throw ConflictException when email already exists', async () => {
+    const duplicateEmailError = new PrismaClientKnownRequestError('Unique constraint failed', {
+      code: 'P2002',
+      clientVersion: '6.6.0',
+    });
+
+    mockUserRepository.create.mockRejectedValueOnce(duplicateEmailError);
+
+    await expect(authService.register('user@example.com', 'P4$sw0rd!')).rejects.toThrow(ConflictException);
+  });
+
+  it('should throw ForbiddenException if refresh token is expired', async () => {
+    const expiredToken = {
+      token: await bcrypt.hash('expired-token', 10),
+      expiresAt: new Date(Date.now() - 60 * 1000), // expired
+      user: { id: 'user-1', role: 'USER' },
+    };
+
+    mockPrismaService.refreshToken.findMany.mockResolvedValue([expiredToken]);
+
+    await expect(authService.refresh('expired-token')).rejects.toThrow();
   });
 });
