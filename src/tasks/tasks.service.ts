@@ -17,7 +17,7 @@ export class TasksService {
   async findOneOrFail(id: string, user: User) {
     const task = await this.prisma.task.findUnique({ where: { id } });
     if (!task) throw new NotFoundException('Task not found');
-    if (task.userId !== user.id && user.role !== 'ADMIN') {
+    if (task.userId !== user.id) {
       throw new ForbiddenException();
     }
     return task;

@@ -66,15 +66,6 @@ describe('TasksService', () => {
     expect(result).toBe(task);
   });
 
-  it('should return task if admin', async () => {
-    const task = { id: 'task-1', userId: 'other-user' };
-    mockPrisma.task.findUnique.mockResolvedValue(task);
-
-    const result = await service.findOneOrFail('task-1', mockAdmin);
-
-    expect(result).toBe(task);
-  });
-
   it('should throw NotFoundException if not found', async () => {
     mockPrisma.task.findUnique.mockResolvedValue(null);
 
@@ -124,15 +115,22 @@ describe('TasksService', () => {
     expect(result.title).toEqual(updateData.title);
   });
 
-  it('should delete task if user is admin', async () => {
-    const task = { id: 'task-1', userId: 'someone-else' };
+  it('should return user-specific tasks if user is a regular user', async () => {
+    const userTasks = [{ id: 'task-user-1' }];
+    mockPrisma.task.findMany.mockResolvedValue(userTasks);
 
+    const result = await service.findByUser(mockUser.id);
+
+    expect(mockPrisma.task.findMany).toHaveBeenCalledWith({
+      where: { userId: mockUser.id },
+    });
+    expect(result).toEqual(userTasks);
+  });
+
+  it('should throw ForbiddenException if admin tries to update a task', async () => {
+    const task = { id: 'task-1', userId: mockUser.id };
     mockPrisma.task.findUnique.mockResolvedValue(task);
-    mockPrisma.task.delete.mockResolvedValue(task);
 
-    const result = await service.delete(task.id, mockAdmin);
-
-    expect(mockPrisma.task.delete).toHaveBeenCalledWith({ where: { id: task.id } });
-    expect(result).toEqual({ success: true });
+    await expect(service.update(task.id, { title: 'x' }, mockAdmin)).rejects.toThrow(ForbiddenException);
   });
 });
