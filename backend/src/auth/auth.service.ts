@@ -8,7 +8,7 @@ import * as bcrypt from 'bcryptjs';
 import { UserRepository } from '../user/user.repository';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthResponse } from '../auth/dto/auth-response.dto';
-import { parseDuration } from '../../src/utils';
+import { parseDuration } from './utils/parse-duration';
 
 @Injectable()
 export class AuthService {
@@ -43,13 +43,30 @@ export class AuthService {
   }
 
   async refresh(refreshToken: string): Promise<AuthResponse> {
-    const tokens = await this.prisma.refreshToken.findMany({
+    const validTokens = await this.prisma.refreshToken.findMany({
+      where: {
+        expiresAt: { gt: new Date() },
+      },
       include: { user: true },
     });
 
-    const tokenEntry = tokens.find((entry) => entry.expiresAt > new Date() && bcrypt.compareSync(refreshToken, entry.token));
+    let tokenEntry;
 
-    if (!tokenEntry) throw new ForbiddenException('Invalid or expired refresh token');
+    for (const entry of validTokens) {
+      const match = await bcrypt.compare(refreshToken, entry.token);
+      if (match) {
+        tokenEntry = entry;
+        break;
+      }
+    }
+
+    if (!tokenEntry) {
+      throw new ForbiddenException('Invalid or expired refresh token');
+    }
+
+    await this.prisma.refreshToken.delete({
+      where: { id: tokenEntry.id },
+    });
 
     return this.generateTokens(tokenEntry.user.id, tokenEntry.user.role);
   }

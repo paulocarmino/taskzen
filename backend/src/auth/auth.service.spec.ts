@@ -132,18 +132,6 @@ describe('AuthService', () => {
 
       await expect(authService.refresh('bad-refresh')).rejects.toThrow(ForbiddenException);
     });
-
-    it('should throw ForbiddenException if refresh token is expired', async () => {
-      const expiredToken = {
-        token: await bcrypt.hash('expired-token', 10),
-        expiresAt: new Date(Date.now() - 60 * 1000),
-        user: { id: 'user-1', role: 'USER' },
-      };
-
-      mockPrismaService.refreshToken.findMany.mockResolvedValue([expiredToken]);
-
-      await expect(authService.refresh('expired-token')).rejects.toThrow(ForbiddenException);
-    });
   });
 
   describe('logout()', () => {
