@@ -7,6 +7,11 @@ import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { useAuthStore } from '@/lib/stores/useAuthStore';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import Link from 'next/link';
+import { Eye, EyeOff } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface SignupFormData {
   name: string;
@@ -14,12 +19,13 @@ interface SignupFormData {
   password: string;
 }
 
-export default function SignupForm() {
+export default function LoginForm() {
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<SignupFormData>();
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -30,6 +36,9 @@ export default function SignupForm() {
 
     try {
       await signup(data.name, data.email, data.password);
+      useAuthStore.getState().setRestored();
+
+      toast('Cadastro realizado com sucesso.');
       router.push('/dashboard');
     } catch (err: any) {
       if (err?.response?.status === 409) {
@@ -43,30 +52,58 @@ export default function SignupForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div>
-        <Label htmlFor="name">Nome</Label>
-        <Input id="name" type="text" {...register('name', { required: true })} />
-        {errors.name && <p className="text-sm text-red-500">Nome obrigatório</p>}
-      </div>
+    <Card className="w-full max-w-md shadow-lg animate-fade-in">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold text-center">Criar uma conta</CardTitle>
+          <CardDescription className="text-center">Digite suas informações para criar uma conta</CardDescription>
+        </CardHeader>
+        <CardContent className="mt-10 space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">E-mail</Label>
+            <Input id="email" type="email" {...register('email', { required: true })} />
+            {errors.email && <p className="text-sm text-red-500">E-mail obrigatório</p>}
+          </div>
 
-      <div>
-        <Label htmlFor="email">E-mail</Label>
-        <Input id="email" type="email" {...register('email', { required: true })} />
-        {errors.email && <p className="text-sm text-red-500">E-mail obrigatório</p>}
-      </div>
+          <div className="space-y-2">
+            <Label htmlFor="name">Nome</Label>
+            <Input id="name" type="name" {...register('name', { required: true })} />
+            {errors.name && <p className="text-sm text-red-500">Nome obrigatório</p>}
+          </div>
 
-      <div>
-        <Label htmlFor="password">Senha</Label>
-        <Input id="password" type="password" {...register('password', { required: true })} />
-        {errors.password && <p className="text-sm text-red-500">Senha obrigatória</p>}
-      </div>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password">Senha</Label>
+            </div>
+            <div className="relative">
+              <Input id="password" type={showPassword ? 'text' : 'password'} {...register('password', { required: true })} />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute right-0 top-0 h-full px-3 py-2 text-gray-400"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </Button>
+            </div>
+            {errors.password && <p className="text-sm text-red-500">Senha obrigatória</p>}
+          </div>
 
-      {error && <p className="text-sm text-red-500">{error}</p>}
-
-      <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? 'Cadastrando...' : 'Cadastrar'}
-      </Button>
-    </form>
+          {error && <p className="text-sm text-red-500">{error}</p>}
+        </CardContent>
+        <CardFooter className="flex flex-col space-y-4">
+          <Button type="submit" className="w-full bg-brand-600 hover:bg-brand-700" disabled={loading}>
+            {loading ? 'Criando conta' : 'Criar conta'}
+          </Button>
+          <div className="text-center text-sm">
+            Já tem uma conta?{' '}
+            <Link href="/login" className="font-medium text-brand-600 hover:text-brand-700">
+              Entre aqui
+            </Link>
+          </div>
+        </CardFooter>
+      </form>
+    </Card>
   );
 }
