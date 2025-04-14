@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, UseGuards, UseInterceptors, ClassSerializerInterceptor, HttpCode } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, UseInterceptors, ClassSerializerInterceptor, HttpCode, Delete } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './decorators/user.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -50,7 +50,7 @@ export class AuthController {
     return new UserEntity(user);
   }
 
-  @Post('logout')
+  @Delete('logout')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Logout (invalidate refresh token)' })

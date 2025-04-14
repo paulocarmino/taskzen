@@ -34,6 +34,8 @@ export class TasksService {
 
   async delete(id: string, user: User) {
     const task = await this.findOneOrFail(id, user);
-    return this.prisma.task.delete({ where: { id: task.id } });
+    await this.prisma.task.delete({ where: { id: task.id } });
+
+    return { success: true };
   }
 }

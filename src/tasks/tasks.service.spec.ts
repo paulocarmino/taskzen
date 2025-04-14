@@ -133,6 +133,6 @@ describe('TasksService', () => {
     const result = await service.delete(task.id, mockAdmin);
 
     expect(mockPrisma.task.delete).toHaveBeenCalledWith({ where: { id: task.id } });
-    expect(result).toEqual(task);
+    expect(result).toEqual({ success: true });
   });
 });

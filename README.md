@@ -69,10 +69,11 @@ REFRESH_TOKEN_EXPIRES_IN=7d
 | POST   | `/auth/login`   | Login com e-mail e senha             |
 | POST   | `/auth/refresh` | Gera novo access/refresh token       |
 | GET    | `/auth/me`      | Retorna usuário autenticado          |
-| POST   | `/auth/logout`  | Revoga o refresh token atual         |
+| DELETE | `/auth/logout`  | Revoga o refresh token atual         |
 | GET    | `/tasks`        | Lista todas as tarefas (ADMIN)       |
-| GET    | `/tasks/mine`   | Lista tarefas do usuário autenticado |
 | POST   | `/tasks`        | Cria nova tarefa                     |
+| GET    | `/tasks/mine`   | Lista tarefas do usuário autenticado |
+| GET    | `/tasks/:id`    | Lista a tarefa por ID (owner/admin)  |
 | PATCH  | `/tasks/:id`    | Atualiza uma tarefa (owner/admin)    |
 | DELETE | `/tasks/:id`    | Deleta uma tarefa (owner/admin)      |
 
