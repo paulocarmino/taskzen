@@ -1,12 +1,25 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { createTask, Task, updateTask } from '@/lib/tasks';
+import { Checkbox } from '@/components/ui/checkbox'; // Use o da sua UI lib, não o do Radix diretamente
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
+
+const taskSchema = z.object({
+  title: z.string().min(1, 'Título é obrigatório'),
+  content: z.string().optional(),
+  done: z.boolean().optional(),
+});
+
+type TaskFormData = z.infer<typeof taskSchema>;
 
 interface TaskModalProps {
   open: boolean;
@@ -16,38 +29,51 @@ interface TaskModalProps {
 }
 
 export default function TaskModal({ open, onClose, task, mutate }: TaskModalProps) {
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [titleError, setTitleError] = useState('');
+  // const {
+  //   register,
+  //   handleSubmit,
+  //   setValue,
+  //   reset,
+  //   formState: { errors },
+  // } = useForm<TaskFormData>({
+  //   resolver: zodResolver(taskSchema),
+  //   defaultValues: {
+  //     title: '',
+  //     content: '',
+  //     done: false,
+  //   },
+  // });
+  const form = useForm<TaskFormData>({
+    resolver: zodResolver(taskSchema),
+    defaultValues: {
+      title: '',
+      content: '',
+      done: false,
+    },
+  });
 
   useEffect(() => {
     if (task) {
-      setTitle(task.title);
-      setContent(String(task.content));
+      form.reset({
+        title: task.title,
+        content: task.content ?? '',
+        done: task.done ?? false,
+      });
     } else {
-      setTitle('');
-      setContent('');
+      form.reset({
+        title: '',
+        content: '',
+        done: false,
+      });
     }
-    setTitleError('');
-  }, [task, open]);
+  }, [task, open, form]);
 
-  const handleSave = () => {
-    if (!task) {
-      handleCreate({ title, content });
+  const onSubmit = async (data: TaskFormData) => {
+    if (task) {
+      await updateTask(task.id, data);
     } else {
-      handleUpdate({ title, content });
+      await createTask(data);
     }
-  };
-
-  const handleCreate = async (data: { title: string; content?: string }) => {
-    await createTask(data);
-
-    mutate();
-    onClose();
-  };
-
-  const handleUpdate = async (data: { title?: string; content?: string }) => {
-    await updateTask(task!.id, data);
 
     mutate();
     onClose();
@@ -59,31 +85,39 @@ export default function TaskModal({ open, onClose, task, mutate }: TaskModalProp
         <DialogHeader>
           <DialogTitle>{task ? 'Editar Tarefa' : 'Criar Nova Tarefa'}</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="title">Titulo</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => {
-                setTitle(e.target.value);
-                if (e.target.value.trim()) setTitleError('');
-              }}
-              placeholder="Digite o título da tarefa"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="title">Título</Label>
+              <Input id="title" {...form.register('title')} placeholder="Digite o título da tarefa" />
+              {form.formState.errors.title && <p className="text-sm text-red-500">{form.formState.errors.title?.message}</p>}
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="content">Conteúdo</Label>
+              <Textarea id="content" {...form.register('content')} placeholder="Digite o conteúdo" rows={4} />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="done"
+              render={({ field }) => (
+                <FormItem className="grid gap-2">
+                  <Label htmlFor="content">Finalizada?</Label>
+                  <FormControl>
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                </FormItem>
+              )}
             />
-            {titleError && <p className="text-sm text-red-500">{titleError}</p>}
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="description">Conteúdo</Label>
-            <Textarea id="content" value={content} onChange={(e) => setContent(e.target.value)} placeholder="Digite o conteúdo" rows={4} />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button onClick={handleSave}>Salvar</Button>
-        </DialogFooter>
+
+            <DialogFooter>
+              <Button variant="outline" type="button" onClick={onClose}>
+                Cancelar
+              </Button>
+              <Button type="submit">Salvar</Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

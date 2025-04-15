@@ -11,10 +11,12 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Task } from '@/lib/tasks';
+import { Task, updateTask } from '@/lib/tasks';
 import { Edit, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import { mutate } from 'swr';
 
 interface TaskTableProps {
   tasks: Task[];
@@ -36,6 +38,11 @@ export default function TaskTable({ tasks, onEditTask, onDeleteTask, readonly }:
     }
   };
 
+  const handleMarkAsDone = async (task: Task) => {
+    await updateTask(task!.id, { done: !task.done });
+    mutate(`/tasks/mine`);
+  };
+
   if (tasks.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 px-4 bg-slate-50 rounded-lg border border-dashed border-slate-300">
@@ -55,6 +62,7 @@ export default function TaskTable({ tasks, onEditTask, onDeleteTask, readonly }:
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-[50px] text-center">Finalizada</TableHead>
               <TableHead className="w-[300px]">Titulo</TableHead>
               <TableHead>Conteúdo</TableHead>
               <TableHead className="w-[150px]">Criada em</TableHead>
@@ -64,6 +72,12 @@ export default function TaskTable({ tasks, onEditTask, onDeleteTask, readonly }:
           <TableBody>
             {tasks.map((task) => (
               <TableRow key={task.id}>
+                <TableCell>
+                  <div className="flex items-center justify-center">
+                    {readonly && <Checkbox id="done" checked={task.done} disabled />}
+                    {!readonly && <Checkbox id="done" checked={task.done} onCheckedChange={() => handleMarkAsDone(task)} />}
+                  </div>
+                </TableCell>
                 <TableCell className="font-medium">{task.title}</TableCell>
                 <TableCell>{task.content}</TableCell>
                 <TableCell>

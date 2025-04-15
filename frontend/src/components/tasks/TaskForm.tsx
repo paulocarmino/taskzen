@@ -6,11 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useRouter } from 'next/navigation';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface TaskFormProps {
   initialData?: {
     title: string;
     content?: string;
+    done?: string;
   };
   onSubmit: (data: { title: string; content?: string }) => void;
   loading?: boolean;
@@ -34,6 +36,11 @@ export default function TaskForm({ initialData, onSubmit, loading }: TaskFormPro
       <div>
         <Label htmlFor="content">Conteúdo</Label>
         <Textarea id="content" {...register('content')} />
+      </div>
+
+      <div>
+        <Label htmlFor="done">Concluído</Label>
+        <Checkbox checked={initialData?.done === 'true'} {...register('done')} />
       </div>
 
       <div className="flex items-center justify-between">
