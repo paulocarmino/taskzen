@@ -37,8 +37,8 @@ git clone https://github.com/seu-usuario/task-manager.git
 cd task-manager
 
 # Configure as variáveis de ambiente
-cp .env.backend.example backend/.env
-cp .env.frontend.example frontend/.env
+cp .env.backend.example .env.backend
+cp .env.frontend.example .env.frontend
 
 # Suba todos os serviços
 docker-compose -p task_manager_prd -f docker-compose.yml up --build

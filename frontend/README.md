@@ -12,7 +12,6 @@ Interface de usuário para o sistema de gerenciamento de tarefas, com autentica�
 - **Formulários:** React Hook Form + Zod
 - **HTTP Client:** Axios + SWR
 - **Infraestrutura:** Docker
-- **Testes:** Playwright (E2E)
 
 ## 🚀 Como rodar o projeto (frontend)
 
@@ -80,15 +79,6 @@ NEXT_PUBLIC_APP_NAME=Task Manager
 - **Zustand para gerenciamento de estado:** Solução leve e performática
 - **SWR para data fetching:** Cache, revalidação e status de loading
 - **Responsividade:** Interface adaptável para dispositivos móveis e desktop
-
-## 🧪 Testes
-
-```bash
-# Testes E2E com Playwright
-pnpm test:e2e
-```
-
-- Testes E2E simulando interações completas do usuário
 
 ## 🧠 Destaques técnicos
 

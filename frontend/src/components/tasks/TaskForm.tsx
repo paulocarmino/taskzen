@@ -12,7 +12,7 @@ interface TaskFormProps {
   initialData?: {
     title: string;
     content?: string;
-    done?: string;
+    done?: boolean;
   };
   onSubmit: (data: { title: string; content?: string }) => void;
   loading?: boolean;
@@ -40,7 +40,7 @@ export default function TaskForm({ initialData, onSubmit, loading }: TaskFormPro
 
       <div>
         <Label htmlFor="done">Concluído</Label>
-        <Checkbox checked={initialData?.done === 'true'} {...register('done')} />
+        <Checkbox checked={initialData?.done} {...register('done')} />
       </div>
 
       <div className="flex items-center justify-between">

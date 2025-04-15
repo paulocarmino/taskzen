@@ -14,11 +14,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    environment:
-      DATABASE_URL: postgres://task_manager:postgres@db:5432/task_manager_production
-      JWT_SECRET: SvG3kCSujc0T52D42W9lvvdF4kf1nvRj
-      JWT_EXPIRES_IN: 15m
-      REFRESH_TOKEN_EXPIRES_IN: 7d
+    env_file: .env.backend
     ports:
       - "4000:4000"
     depends_on:
@@ -28,8 +24,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    environment:
-      NEXT_PUBLIC_API_URL: http://localhost:4000
+    env_file: .env.frontend
     ports:
       - "3000:3000"
     depends_on:

@@ -1,0 +1,50 @@
+name: CI - Backend e Frontend
+
+on:
+  push:
+    branches: ['main']
+  pull_request:
+    branches: ['main']
+
+jobs:
+  validate:
+    name: Validar ${{ matrix.project }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        project: [backend, frontend]
+
+    defaults:
+      run:
+        working-directory: ${{ matrix.project }}
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Instalar Node.js e PNPM
+        uses: actions/setup-node@v4
+
+      - name: Instalar PNPM
+        run: corepack enable pnpm
+
+      - name: Instalar dependências (${{
+          matrix.project }})
+        run: pnpm install
+
+      - name: Gerar prisma client
+        if: matrix.project == 'backend'
+        run: pnpm prisma generate
+
+      - name: Rodar testes do backend
+        if: matrix.project == 'backend'
+        run: pnpm test
+
+      - name: Rodar build do backend
+        if: matrix.project == 'backend'
+        run: pnpm build
+
+      - name: Rodar build do frontend
+        if: matrix.project == 'frontend'
+        run: pnpm build
