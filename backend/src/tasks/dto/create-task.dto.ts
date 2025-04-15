@@ -1,4 +1,4 @@
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsOptional, IsBoolean } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateTaskDto {
@@ -10,4 +10,8 @@ export class CreateTaskDto {
   @IsOptional()
   @IsString()
   content?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  done?: boolean;
 }
