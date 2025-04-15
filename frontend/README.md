@@ -1,4 +1,4 @@
-# 🧠 ZenTask Frontend
+# 🧠 TaskZen Frontend
 
 Interface de usuário para o sistema de gerenciamento de tarefas, com autenticação, perfis de usuário e gerenciamento completo de tarefas.
 
@@ -49,7 +49,6 @@ Acesse a aplicação em:
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:4000
-NEXT_PUBLIC_APP_NAME=Task Manager
 ```
 
 ## 🎯 Funcionalidades principais

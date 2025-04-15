@@ -10,8 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { createTask, Task, updateTask } from '@/lib/tasks';
-import { Checkbox } from '@/components/ui/checkbox'; // Use o da sua UI lib, não o do Radix diretamente
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 
 const taskSchema = z.object({
   title: z.string().min(1, 'Título é obrigatório'),
@@ -29,20 +29,6 @@ interface TaskModalProps {
 }
 
 export default function TaskModal({ open, onClose, task, mutate }: TaskModalProps) {
-  // const {
-  //   register,
-  //   handleSubmit,
-  //   setValue,
-  //   reset,
-  //   formState: { errors },
-  // } = useForm<TaskFormData>({
-  //   resolver: zodResolver(taskSchema),
-  //   defaultValues: {
-  //     title: '',
-  //     content: '',
-  //     done: false,
-  //   },
-  // });
   const form = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
@@ -87,24 +73,41 @@ export default function TaskModal({ open, onClose, task, mutate }: TaskModalProp
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="title">Título</Label>
-              <Input id="title" {...form.register('title')} placeholder="Digite o título da tarefa" />
-              {form.formState.errors.title && <p className="text-sm text-red-500">{form.formState.errors.title?.message}</p>}
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="content">Conteúdo</Label>
-              <Textarea id="content" {...form.register('content')} placeholder="Digite o conteúdo" rows={4} />
-            </div>
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem className="grid gap-2">
+                  <Label htmlFor="title">Título</Label>
+                  <FormControl>
+                    <Input id="title" placeholder="Digite o título da tarefa" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="content"
+              render={({ field }) => (
+                <FormItem className="grid gap-2">
+                  <Label htmlFor="content">Conteúdo</Label>
+                  <FormControl>
+                    <Textarea id="content" placeholder="Digite o conteúdo" rows={4} {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
               name="done"
               render={({ field }) => (
                 <FormItem className="grid gap-2">
-                  <Label htmlFor="content">Finalizada?</Label>
+                  <Label htmlFor="done">Finalizada?</Label>
                   <FormControl>
-                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                    <Checkbox id="done" checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
                 </FormItem>
               )}

@@ -1,4 +1,4 @@
-# 🧠 ZenTask - Task Manager
+# 🧠 TaskZen - Gerenciador de tarefas
 
 Sistema completo de gerenciamento de tarefas com autenticação JWT, controle de permissões por papel (RBAC), interface de usuário moderna e documentação Swagger.
 
@@ -33,15 +33,15 @@ task-manager/
 
 ```bash
 # Clone o repositório
-git clone https://github.com/seu-usuario/task-manager.git
-cd task-manager
+git clone https://github.com/paulocarmino/taskzen
+cd taskzen
 
 # Configure as variáveis de ambiente
 cp .env.backend.example .env.backend
 cp .env.frontend.example .env.frontend
 
 # Suba todos os serviços
-docker-compose -p task_manager_prd -f docker-compose.yml up --build
+docker-compose -p taskzen_prd -f docker-compose.yml up --build
 ```
 
 Isso irá:
